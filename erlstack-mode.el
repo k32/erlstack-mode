@@ -107,23 +107,23 @@
   "Intercalate strings with regexp RE matching whitespace."
   (--reduce (concat acc "[ \t\n]*" it) re))
 
-(defvar erlstack--string-re
-  "\"\\([^\"]*\\)\"")
+(defvar erlstack--string-re)
+(setq erlstack--string-re "\"\\([^\"]*\\)\"")
 
-(defvar erlstack--file-re
-  (erlstack--whitespacify-concat "{" "file" "," erlstack--string-re "}"))
+(defvar erlstack--file-re)
+(setq erlstack--file-re (erlstack--whitespacify-concat "{" "file" "," erlstack--string-re "}"))
 
-(defvar erlstack--line-re
-  (erlstack--whitespacify-concat "{" "line" "," "\\([[:digit:]]+\\)" "}"))
+(defvar erlstack--line-re)
+(setq erlstack--line-re (erlstack--whitespacify-concat "{" "line" "," "\\([[:digit:]]+\\)" "}"))
 
-(defvar erlstack--position-re
-  (erlstack--whitespacify-concat "\\[" erlstack--file-re "," erlstack--line-re "]"))
+(defvar erlstack--position-re)
+(setq erlstack--position-re (erlstack--whitespacify-concat "\\[" erlstack--file-re "," erlstack--line-re "]"))
 
-(defvar erlstack--stack-frame-re
-  (erlstack--whitespacify-concat erlstack--position-re "}"))
+(defvar erlstack--stack-frame-re)
+(setq erlstack--stack-frame-re (erlstack--whitespacify-concat erlstack--position-re "}"))
 
-(defvar erlstack--stack-end-re
-  "}]}")
+(defvar erlstack--stack-end-re)
+(setq erlstack--stack-end-re "}]}")
 
 ;;; Custom items:
 
@@ -408,6 +408,17 @@ the line of the code"
 ;; =ERROR REPORT==== 21-Dec-2018::19:23:26.292922 ===
 ;; Error in process <0.88.0> with exit value:
 ;; {1,[{shell,apply_fun,3,[{file,"shell.erl"},{line,907}]}]}
+
+
+
+;; [{file,"/store/Documents/Lee/src/lee_model.erl"},
+;;   {line,100}]},
+;; {lee,get,3,
+;;  [{file,"/store/Documents/Lee/src/lee.erl"},{line,176}]},
+;; {lee,validate_value,4,
+;;  [{file,"/store/Documents/Lee/src/lee.erl"},{line,253}]},
+;; {lee,validate_moc_instances,4,
+;;  [{file,"/store/Documents/Lee/src/lee.erl"},{line,243}]},
 
 
 ;;; erlstack-mode.el ends here
