@@ -107,37 +107,31 @@
   "Intercalate strings with regexp RE matching whitespace."
   (--reduce (concat acc "[ \t\n]*" it) re))
 
-(defvar erlstack--string-re)
-(setq erlstack--string-re "\"\\([^\"]*\\)\"")
+(defvar erlstack--string-re
+  "\"\\([^\"]*\\)\"")
 
-(defvar erlstack--file-re)
-(setq erlstack--file-re (erlstack--whitespacify-concat "{" "file" "," erlstack--string-re "}"))
+(defvar erlstack--file-re
+  (erlstack--whitespacify-concat "{" "file" "," erlstack--string-re "}"))
 
-(defvar erlstack--line-re)
-(setq erlstack--line-re (erlstack--whitespacify-concat "{" "line" "," "\\([[:digit:]]+\\)" "}"))
+(defvar erlstack--line-re
+  (erlstack--whitespacify-concat "{" "line" "," "\\([[:digit:]]+\\)" "}"))
 
-(defvar erlstack--position-re)
-(setq erlstack--position-re (erlstack--whitespacify-concat "\\[" erlstack--file-re "," erlstack--line-re "]"))
+(defvar erlstack--position-re
+  (erlstack--whitespacify-concat "\\[" erlstack--file-re "," erlstack--line-re "]"))
 
-(defvar erlstack--stack-frame-old-re)
-(setq erlstack--stack-frame-old-re
-      (erlstack--whitespacify-concat erlstack--position-re "}"))
+(defvar erlstack--stack-frame-old-re
+  (erlstack--whitespacify-concat erlstack--position-re "}"))
+(defvar erlstack--stack-frame-new-re
+  (erlstack--whitespacify-concat "(\\(.+\\.erl\\)," "line" "\\([[:digit:]]+\\))"))
+(defvar erlstack--stack-frame-re
+  (concat erlstack--stack-frame-old-re "\\|" erlstack--stack-frame-new-re))
 
-(defvar erlstack--stack-frame-new-re)
-(setq erlstack--stack-frame-new-re
-      (erlstack--whitespacify-concat "(\\(.+\\.erl\\)," "line" "\\([[:digit:]]+\\))"))
-
-(defvar erlstack--stack-frame-re)
-(setq erlstack--stack-frame-re
-      (concat erlstack--stack-frame-old-re "\\|" erlstack--stack-frame-new-re))
-
-(defvar erlstack--stack-end-new-re)
-(setq erlstack--stack-end-new-re ")$")
-
-(defvar erlstack--stack-end-re)
-(setq erlstack--stack-end-re (concat erlstack--stack-end-old-re
-                                     "\\|"
-                                     erlstack--stack-end-new-re))
+(defvar erlstack--stack-end-new-re ")$")
+(defvar erlstack--stack-end-old-re "}]}")
+(defvar erlstack--stack-end-re
+  (concat erlstack--stack-end-old-re
+          "\\|"
+          erlstack--stack-end-new-re))
 
 ;;; Custom items:
 
@@ -423,4 +417,4 @@ the line of the code"
 
 (provide 'erlstack-mode)
 
-;; erlstack-mode.el ends here
+;;; erlstack-mode.el ends here
