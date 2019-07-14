@@ -125,11 +125,11 @@
 
 (defvar erlstack--stack-frame-new-re)
 (setq erlstack--stack-frame-new-re
-      (erlstack--whitespacify-concat "(\\([[:alnum:]]\\.erl\\)," "line" "\\([[:digit:]]+\\))"))
+      (erlstack--whitespacify-concat "(\\(.+\\.erl\\)," "line" "\\([[:digit:]]+\\))"))
 
 (defvar erlstack--stack-frame-re)
-(setq erlstack--stack-frame-re (concat "\\(" erlstack--stack-frame-old-re "\\)\\|"
-                                       "\\(" erlstack--stack-frame-new-re "\\)"))
+(setq erlstack--stack-frame-re
+      (concat erlstack--stack-frame-old-re "\\|" erlstack--stack-frame-new-re))
 
 (defvar erlstack--stack-end-new-re)
 (setq erlstack--stack-end-new-re ")$")
@@ -199,8 +199,8 @@ alternative"
 
 (defun erlstack--frame-found (begin end)
   "This fuction is called with arguments BEGIN END when point enters stack frame."
-  (let ((query       (match-string 2))
-        (line-number (string-to-number (match-string 3))))
+  (let ((query       (match-string 1))
+        (line-number (string-to-number (match-string 2))))
     ;; Hack: preserve initial state of the code window by restoring it
     (when erlstack--code-window-active
       (quit-restore-window erlstack--code-window))
@@ -276,6 +276,13 @@ alternative"
        (`(,begin ,end) (erlstack--frame-found begin end))
        (_              (erlstack--frame-lost))))))
 
+(defun erlstack--re-search-backward (res)
+  (let ((bound (save-excursion (forward-line -1)
+                               (line-beginning-position))))
+    (dolist (i res)
+      (when (re-search-backward i bound t)
+        (return (point))))))
+
 (defun erlstack--parse-at-point ()
   "Attempt to find stacktrace at point."
   (save-excursion
@@ -284,10 +291,8 @@ alternative"
                                   (save-excursion (forward-line 1)
                                                   (line-end-position))
                                   t))
-          (begin (re-search-backward erlstack--stack-frame-re
-                                     (save-excursion (forward-line -1)
-                                                     (line-beginning-position))
-                                     t)))
+          (begin (erlstack--re-search-backward `(,erlstack--stack-frame-old-re
+                                                 ,erlstack--stack-frame-new-re))))
       (when (and begin end (>= point begin))
         `(,begin ,end)))))
 
@@ -336,13 +341,15 @@ drectory or `nil' otherwise."
   "Move one stack frame up."
   (interactive)
   (erlstack-jump-frame
-   (re-search-backward erlstack--file-re bound t)))
+   (re-search-backward erlstack--stack-frame-re bound t)))
 
 (defun erlstack-down-frame ()
   "Move one stack frame down."
   (interactive)
   (erlstack-jump-frame
-   (re-search-forward erlstack--file-re bound t 2)))
+   (progn
+     (re-search-forward erlstack--stack-frame-re bound t 2)
+     (re-search-backward erlstack--stack-frame-re bound t)))) ;; TODO: refactor this hack \^////
 
 ;;; User commands:
 
