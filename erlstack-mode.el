@@ -119,11 +119,25 @@
 (defvar erlstack--position-re)
 (setq erlstack--position-re (erlstack--whitespacify-concat "\\[" erlstack--file-re "," erlstack--line-re "]"))
 
+(defvar erlstack--stack-frame-old-re)
+(setq erlstack--stack-frame-old-re
+      (erlstack--whitespacify-concat erlstack--position-re "}"))
+
+(defvar erlstack--stack-frame-new-re)
+(setq erlstack--stack-frame-new-re
+      (erlstack--whitespacify-concat "(\\([[:alnum:]]\\.erl\\)," "line" "\\([[:digit:]]+\\))"))
+
 (defvar erlstack--stack-frame-re)
-(setq erlstack--stack-frame-re (erlstack--whitespacify-concat erlstack--position-re "}"))
+(setq erlstack--stack-frame-re (concat "\\(" erlstack--stack-frame-old-re "\\)\\|"
+                                       "\\(" erlstack--stack-frame-new-re "\\)"))
+
+(defvar erlstack--stack-end-new-re)
+(setq erlstack--stack-end-new-re ")$")
 
 (defvar erlstack--stack-end-re)
-(setq erlstack--stack-end-re "}]}")
+(setq erlstack--stack-end-re (concat erlstack--stack-end-old-re
+                                     "\\|"
+                                     erlstack--stack-end-new-re))
 
 ;;; Custom items:
 
@@ -185,8 +199,8 @@ alternative"
 
 (defun erlstack--frame-found (begin end)
   "This fuction is called with arguments BEGIN END when point enters stack frame."
-  (let ((query       (match-string 1))
-        (line-number (string-to-number (match-string 2))))
+  (let ((query       (match-string 2))
+        (line-number (string-to-number (match-string 3))))
     ;; Hack: preserve initial state of the code window by restoring it
     (when erlstack--code-window-active
       (quit-restore-window erlstack--code-window))
@@ -267,9 +281,13 @@ alternative"
   (save-excursion
     (let ((point (point))
           (end (re-search-forward erlstack--stack-end-re
-                                  (+ (point) erlstack-lookup-window) t))
+                                  (save-excursion (forward-line 1)
+                                                  (line-end-position))
+                                  t))
           (begin (re-search-backward erlstack--stack-frame-re
-                                     (- (point) erlstack-lookup-window) t)))
+                                     (save-excursion (forward-line -1)
+                                                     (line-beginning-position))
+                                     t)))
       (when (and begin end (>= point begin))
         `(,begin ,end)))))
 
@@ -367,14 +385,15 @@ drectory or `nil' otherwise."
 
 (defun erlstack-locate-projectile (query _line)
   "Try searching for module QUERY in the current `projectile' root."
-  (let ((dir (projectile-project-root))
-        (query- (file-name-nondirectory query)))
-    (when dir
-      (erlstack--cache-projectile
-       (list dir query)
-       `(directory-files-recursively
-         ,dir
-         ,(concat "^" query- "$"))))))
+  (when (fboundp 'projectile-project-root)
+    (let ((dir (projectile-project-root))
+          (query- (file-name-nondirectory query)))
+      (when dir
+        (erlstack--cache-projectile
+         (list dir query)
+         `(directory-files-recursively
+           ,dir
+           ,(concat "^" query- "$")))))))
 
 (defun erlstack-locate-existing-buffer (query _line)
   "Try matching existing buffers with QUERY."
@@ -397,28 +416,4 @@ the line of the code"
 
 (provide 'erlstack-mode)
 
-;;; Example stacktraces:
-;;
-;; [{shell,apply_fun,3,[{file,"shell.erl"},{line,907}]},
-;;  {erl_eval,do_apply,6,[{file,"erl_eval.erl"},{line,681}]},
-;;  {erl_eval,try_clauses,8,[{file,"erl_eval.erl"},{line,911}]},
-;;  { shell , exprs , 7 , [{file,"shell.erl"},{line,686}]},{shell,eval_exprs,7,[{file,"shell.erl"},{line,642}]},
-;;  {shell,eval_loop,3,[ {file,"shell.erl"}, {line,627}]}]
-;;
-;; =ERROR REPORT==== 21-Dec-2018::19:23:26.292922 ===
-;; Error in process <0.88.0> with exit value:
-;; {1,[{shell,apply_fun,3,[{file,"shell.erl"},{line,907}]}]}
-
-
-
-;; [{file,"/store/Documents/Lee/src/lee_model.erl"},
-;;   {line,100}]},
-;; {lee,get,3,
-;;  [{file,"/store/Documents/Lee/src/lee.erl"},{line,176}]},
-;; {lee,validate_value,4,
-;;  [{file,"/store/Documents/Lee/src/lee.erl"},{line,253}]},
-;; {lee,validate_moc_instances,4,
-;;  [{file,"/store/Documents/Lee/src/lee.erl"},{line,243}]},
-
-
-;;; erlstack-mode.el ends here
+;; erlstack-mode.el ends here

@@ -1,8 +1,11 @@
-#+TITLE: Analyse Erlang stack traces
+#+TITLE: Analyze Erlang stack traces
+
+[[https://melpa.org/#/erlstack-mode][file:https://melpa.org/packages/erlstack-mode-badge.svg]]
 
 [[file:pictures/screencap.gif]]
 
-Enable =erlstack-mode= globally to peek at source code of functions appearing in Erlang stack traces:
+Enable =erlstack-mode= globally to peek at the source code of
+functions appearing in Erlang stack traces:
 
 #+BEGIN_SRC elisp
 (require 'erlstack-mode)

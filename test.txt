@@ -1,0 +1,36 @@
+Example stacktraces:
+
+[{shell,apply_fun,3,[{file,"shell.erl"},{line,907}]},
+ {erl_eval,do_apply,6,[{file,"erl_eval.erl"},{line,681}]},
+ {erl_eval,try_clauses,8,[{file,"erl_eval.erl"},{line,911}]},
+ { shell , exprs , 7 , [{file,"shell.erl"},{line,686}]},{shell,eval_exprs,7,[{file,"shell.erl"},{line,642}]},
+ {shell,eval_loop,3,[ {file,"shell.erl"}, {line,627}]}]
+
+=ERROR REPORT==== 21-Dec-2018::19:23:26.292922 ===
+Error in process <0.88.0> with exit value:
+{1,[{shell,apply_fun,3,[{file,"shell.erl"},{line,907}]}]}
+
+
+
+[{file,"/store/Documents/Lee/src/lee_model.erl"},
+  {line,100}]},
+{lee,get,3,
+ [{file,"/store/Documents/Lee/src/lee.erl"},{line,176}]},
+{lee,validate_value,4,
+ [{file,"/store/Documents/Lee/src/lee.erl"},{line,253}]},
+{lee,validate_moc_instances,4,
+ [{file,"/store/Documents/Lee/src/lee.erl"},{line,243}]},
+
+New logger style:
+** exception error: no function clause matching
+                    xmerl_lib:expand_element(102,1,
+                                             [{title,1},{article,1}],
+                                             false) (xmerl_lib.erl, line 152)
+     in function  xmerl_lib:expand_content/4 (xmerl_lib.erl, line 225)
+     in call from xmerl_lib:expand_element/4 (xmerl_lib.erl, line 188)
+     in call from xmerl_lib:expand_content/4 (xmerl_lib.erl, line 225)
+     in call from xmerl_lib:expand_element/4 (xmerl_lib.erl, line 188)
+     in call from xmerl_lib:expand_content/4 (xmerl_lib.erl, line 225)
+     in call from xmerl:export_simple1/3 (xmerl.erl, line 163)
+
+erlstack-mode.el ends here
